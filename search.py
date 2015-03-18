@@ -101,12 +101,27 @@ def depthFirstSearch(problem):
 
         for tempLocation in problem.getSuccessors(currentPosition[0]):
             if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = tempLocation
+                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
 
                 stackNodes.push(tempLocation)
 
-    print(currentPosition)
-    print(rounds)
+    if problem.isGoalState(currentPosition[0]):
+        s = []
+
+        current1 = currentPosition[0]
+        stack1 = Stack()
+
+        while current1 != problem.getStartState():
+            stack1.push(alreadyVisitedNodes[current1][1])
+
+            current1 = alreadyVisitedNodes[current1][3]
+
+        while not stack1.isEmpty():
+            s += [stack1.pop()]
+
+        return s
+    else:
+        return None
 
 
 
@@ -130,7 +145,7 @@ def breadthFirstSearch(problem):
 
         for tempLocation in problem.getSuccessors(currentPosition[0]):
             if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = tempLocation
+                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
 
                 stackNodes.push(tempLocation)
 
