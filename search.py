@@ -202,6 +202,8 @@ def uniformCostSearch(problem):
     else:
         return None
 
+
+
 def nullHeuristic(state, problem=None):
   """
   A heuristic function estimates the cost from the current state to the nearest
@@ -210,9 +212,49 @@ def nullHeuristic(state, problem=None):
   return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-  "Search the node that has the lowest combined cost and heuristic first."
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+    "Search the node that has the lowest combined cost and heuristic first."
+
+    steps = []
+
+    currentPosition = problem.getStartState()
+
+    stackNodes = PriorityQueue()
+
+    alreadyVisitedNodes = {}
+
+    stackNodes.push([currentPosition], heuristic(currentPosition, problem))
+    alreadyVisitedNodes[currentPosition] = [currentPosition]
+    rounds = 0
+
+    while not problem.isGoalState(currentPosition[0]) and not stackNodes.isEmpty():
+
+        rounds += 1
+        currentPosition = stackNodes.pop()
+
+        for tempLocation in problem.getSuccessors(currentPosition[0]):
+            if tempLocation[0] not in alreadyVisitedNodes:
+                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
+
+                stackNodes.push(tempLocation, heuristic(tempLocation[0], problem))
+                #stackNodes.push(tempLocation, heuristic(currentPosition[0], problem))
+
+    if problem.isGoalState(currentPosition[0]):
+        s = []
+
+        current1 = currentPosition[0]
+        stack1 = Stack()
+
+        while current1 != problem.getStartState():
+            stack1.push(alreadyVisitedNodes[current1][1])
+
+            current1 = alreadyVisitedNodes[current1][3]
+
+        while not stack1.isEmpty():
+            s += [stack1.pop()]
+
+        return s
+    else:
+        return None
     
   
 # Abbreviations
