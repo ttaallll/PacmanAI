@@ -70,26 +70,18 @@ def tinyMazeSearch(problem):
 from util import Stack
 from util import Queue
 
-def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first [p 85].
-
-    Your search algorithm needs to return a list of actions that reaches
-    the goal.  Make sure to implement a graph search algorithm [Fig. 3.7].
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-    """
-    # print("Start:", problem.getStartState())
-    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-
+def commonSearch(problem, dfsOrBfs):
     steps = []
 
     currentPosition = problem.getStartState()
 
+    if dfsOrBfs:
+        stackNodes = Stack()
+    else:
+        stackNodes = Queue()
+
     alreadyVisitedNodes = {}
-    stackNodes = Stack()
+
     stackNodes.push([currentPosition])
     alreadyVisitedNodes[currentPosition] = [currentPosition]
     rounds = 0
@@ -123,18 +115,61 @@ def depthFirstSearch(problem):
     else:
         return None
 
+def depthFirstSearch(problem):
+    """
+    Search the deepest nodes in the search tree first [p 85].
+
+    Your search algorithm needs to return a list of actions that reaches
+    the goal.  Make sure to implement a graph search algorithm [Fig. 3.7].
+
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+    """
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+
+    return commonSearch(problem, True)
+
 
 
 def breadthFirstSearch(problem):
     "Search the shallowest nodes in the search tree first. [p 81]"
 
+    return commonSearch(problem, False)
+
+
+from util import PriorityQueue
+
+def getActions(problem, currentPosition, alreadyVisitedNodes):
+
+    s = []
+
+    current1 = currentPosition[0]
+    stack1 = Stack()
+
+    while current1 != problem.getStartState():
+        stack1.push(alreadyVisitedNodes[current1][1])
+
+        current1 = alreadyVisitedNodes[current1][3]
+
+    while not stack1.isEmpty():
+        s += [stack1.pop()]
+
+    return s
+
+def uniformCostSearch(problem):
+    "Search the node of least total cost first. "
+
     steps = []
 
     currentPosition = problem.getStartState()
 
+    stackNodes = PriorityQueue()
+
     alreadyVisitedNodes = {}
-    stackNodes = Queue()
-    stackNodes.push([currentPosition])
+
+    stackNodes.push([currentPosition], 999)
     alreadyVisitedNodes[currentPosition] = [currentPosition]
     rounds = 0
 
@@ -147,15 +182,25 @@ def breadthFirstSearch(problem):
             if tempLocation[0] not in alreadyVisitedNodes:
                 alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
 
-                stackNodes.push(tempLocation)
+                stackNodes.push(tempLocation, problem.getCostOfActions(getActions(problem, tempLocation, alreadyVisitedNodes)))
 
-    print(currentPosition)
+    if problem.isGoalState(currentPosition[0]):
+        s = []
 
+        current1 = currentPosition[0]
+        stack1 = Stack()
 
-def uniformCostSearch(problem):
-  "Search the node of least total cost first. "
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+        while current1 != problem.getStartState():
+            stack1.push(alreadyVisitedNodes[current1][1])
+
+            current1 = alreadyVisitedNodes[current1][3]
+
+        while not stack1.isEmpty():
+            s += [stack1.pop()]
+
+        return s
+    else:
+        return None
 
 def nullHeuristic(state, problem=None):
   """
