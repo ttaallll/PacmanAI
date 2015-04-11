@@ -70,50 +70,40 @@ def tinyMazeSearch(problem):
 from util import Stack
 from util import Queue
 
-def commonSearch(problem, dfsOrBfs):
-    steps = []
+def commonSearch(problem, dataStructure):
+
 
     currentPosition = problem.getStartState()
 
-    if dfsOrBfs:
-        stackNodes = Stack()
-    else:
-        stackNodes = Queue()
+    stackNodes = dataStructure
 
     alreadyVisitedNodes = {}
 
-    stackNodes.push([currentPosition])
-    alreadyVisitedNodes[currentPosition] = [currentPosition]
+    stackNodes.push([(currentPosition, "Stop", 0)])
+    alreadyVisitedNodes[currentPosition] = True
     rounds = 0
 
-    while not problem.isGoalState(currentPosition[0]) and not stackNodes.isEmpty():
+    while not stackNodes.isEmpty():
 
         rounds += 1
-        currentPosition = stackNodes.pop()
+        currentPath = stackNodes.pop()
 
-        for tempLocation in problem.getSuccessors(currentPosition[0]):
+        lastState = currentPath[len(currentPath) - 1][0]
+
+        for tempLocation in problem.getSuccessors(lastState):
+
+            if problem.isGoalState(tempLocation[0]):
+                goalPath = []
+                for tempNode in currentPath:
+                    goalPath += [tempNode[1]]
+                return goalPath + [tempLocation[1]]
+
             if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
+                alreadyVisitedNodes[tempLocation[0]] = True
 
-                stackNodes.push(tempLocation)
+                stackNodes.push(currentPath + [tempLocation])
 
-    if problem.isGoalState(currentPosition[0]):
-        s = []
-
-        current1 = currentPosition[0]
-        stack1 = Stack()
-
-        while current1 != problem.getStartState():
-            stack1.push(alreadyVisitedNodes[current1][1])
-
-            current1 = alreadyVisitedNodes[current1][3]
-
-        while not stack1.isEmpty():
-            s += [stack1.pop()]
-
-        return s
-    else:
-        return None
+    return []
 
 def depthFirstSearch(problem):
     """
@@ -129,79 +119,27 @@ def depthFirstSearch(problem):
     # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
 
-    return commonSearch(problem, True)
+    return commonSearch(problem, Stack())
 
 
 
 def breadthFirstSearch(problem):
     "Search the shallowest nodes in the search tree first. [p 81]"
 
-    return commonSearch(problem, False)
+    return commonSearch(problem, Queue())
 
-
-from util import PriorityQueue
-
-def getActions(problem, currentPosition, alreadyVisitedNodes):
-
-    s = []
-
-    current1 = currentPosition[0]
-    stack1 = Stack()
-
-    while current1 != problem.getStartState():
-        stack1.push(alreadyVisitedNodes[current1][1])
-
-        current1 = alreadyVisitedNodes[current1][3]
-
-    while not stack1.isEmpty():
-        s += [stack1.pop()]
-
-    return s
+from util import PriorityQueueWithFunction
 
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
 
-    steps = []
+    def costFunction(path1):
+        pathNodes = []
+        for tempNode in path1:
+            pathNodes += [tempNode[1]]
+        return problem.getCostOfActions(pathNodes)
 
-    currentPosition = problem.getStartState()
-
-    stackNodes = PriorityQueue()
-
-    alreadyVisitedNodes = {}
-
-    stackNodes.push([currentPosition], 999)
-    alreadyVisitedNodes[currentPosition] = [currentPosition]
-    rounds = 0
-
-    while not problem.isGoalState(currentPosition[0]) and not stackNodes.isEmpty():
-
-        rounds += 1
-        currentPosition = stackNodes.pop()
-
-        for tempLocation in problem.getSuccessors(currentPosition[0]):
-            if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
-
-                stackNodes.push(tempLocation, problem.getCostOfActions(getActions(problem, tempLocation, alreadyVisitedNodes)))
-
-    if problem.isGoalState(currentPosition[0]):
-        s = []
-
-        current1 = currentPosition[0]
-        stack1 = Stack()
-
-        while current1 != problem.getStartState():
-            stack1.push(alreadyVisitedNodes[current1][1])
-
-            current1 = alreadyVisitedNodes[current1][3]
-
-        while not stack1.isEmpty():
-            s += [stack1.pop()]
-
-        return s
-    else:
-        return None
-
+    return commonSearch(problem, PriorityQueueWithFunction(costFunction))
 
 
 def nullHeuristic(state, problem=None):
@@ -214,48 +152,14 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
 
-    steps = []
+    def costFunction(path1):
+        pathNodes = []
+        for tempNode in path1:
+            pathNodes += [tempNode[1]]
+        return problem.getCostOfActions(pathNodes) + heuristic(path1[len(path1) - 1][0], problem)
 
-    currentPosition = problem.getStartState()
+    return commonSearch(problem, PriorityQueueWithFunction(costFunction))
 
-    stackNodes = PriorityQueue()
-
-    alreadyVisitedNodes = {}
-
-    stackNodes.push([currentPosition], heuristic(currentPosition, problem))
-    alreadyVisitedNodes[currentPosition] = [currentPosition]
-    rounds = 0
-
-    while not problem.isGoalState(currentPosition[0]) and not stackNodes.isEmpty():
-
-        rounds += 1
-        currentPosition = stackNodes.pop()
-
-        for tempLocation in problem.getSuccessors(currentPosition[0]):
-            if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = tempLocation + (currentPosition[0],)
-
-                stackNodes.push(tempLocation, heuristic(tempLocation[0], problem))
-                #stackNodes.push(tempLocation, heuristic(currentPosition[0], problem))
-
-    if problem.isGoalState(currentPosition[0]):
-        s = []
-
-        current1 = currentPosition[0]
-        stack1 = Stack()
-
-        while current1 != problem.getStartState():
-            stack1.push(alreadyVisitedNodes[current1][1])
-
-            current1 = alreadyVisitedNodes[current1][3]
-
-        while not stack1.isEmpty():
-            s += [stack1.pop()]
-
-        return s
-    else:
-        return None
-    
   
 # Abbreviations
 bfs = breadthFirstSearch
