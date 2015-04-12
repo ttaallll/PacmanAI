@@ -77,10 +77,10 @@ def commonSearch(problem, dataStructure):
 
     stackNodes = dataStructure
 
-    alreadyVisitedNodes = {}
+    alreadyVisitedNodes = []
 
     stackNodes.push([(currentPosition, "Stop", 0)])
-    alreadyVisitedNodes[currentPosition] = True
+    alreadyVisitedNodes += [currentPosition]
     rounds = 0
 
     while not stackNodes.isEmpty():
@@ -99,7 +99,7 @@ def commonSearch(problem, dataStructure):
                 return goalPath + [tempLocation[1]]
 
             if tempLocation[0] not in alreadyVisitedNodes:
-                alreadyVisitedNodes[tempLocation[0]] = True
+                alreadyVisitedNodes += [tempLocation[0]]
 
                 stackNodes.push(currentPath + [tempLocation])
 
