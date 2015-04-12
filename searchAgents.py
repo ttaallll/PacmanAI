@@ -488,7 +488,27 @@ def foodHeuristic(state, problem):
   """
   position, foodGrid = state
   "*** YOUR CODE HERE ***"
-  return 0
+  #return 0
+
+  location = state[0]
+  foodLocations = state[1].asList()
+
+
+  sumOfPath = 0
+  cornersLeftToVisit = foodLocations[:]
+  currentLocation = location
+  while len(cornersLeftToVisit) > 0:
+      closestCornerToLocation = closestCorner(currentLocation, cornersLeftToVisit)
+      sumOfPath += manhattanDistance(currentLocation, closestCornerToLocation)
+      currentLocation = closestCornerToLocation
+      cornersLeftToVisit.remove(closestCornerToLocation)
+
+  return sumOfPath
+
+  # closestLocation = closestCorner(location, foodLocations)
+  #
+  # return manhattanDistance(location, closestLocation)
+
   
 class ClosestDotSearchAgent(SearchAgent):
   "Search for all food using a sequence of searches"
@@ -516,7 +536,10 @@ class ClosestDotSearchAgent(SearchAgent):
     problem = AnyFoodSearchProblem(gameState)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    actions = search.bfs(problem)
+
+    return actions
   
 class AnyFoodSearchProblem(PositionSearchProblem):
   """
@@ -552,7 +575,20 @@ class AnyFoodSearchProblem(PositionSearchProblem):
     x,y = state
     
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    foodList = self.food.asList()
+
+    minimumDistance = 9999
+    minimumFood = foodList[0]
+    for tempFood in foodList:
+        tempDistance = manhattanDistance(state, tempFood)
+        if tempDistance < minimumDistance:
+            minimumDistance = tempDistance
+            minimumFood = tempFood
+
+
+
+    return state == minimumFood
 
 ##################
 # Mini-contest 1 #
